@@ -18,3 +18,25 @@ año, o un mismo mes.
 error será necesario avanzar de a pocos hasta terminar de parsear todas las
 hojas HTML.
 
+## JSON
+La idea es que se generen un archivo JSON con estos mismos campos:
+
+```javascript
+{
+    "time_start": "12:51",
+    "office": "DGAAE - DESPACHO",
+    "title": "Especialista I",
+    "meeting_place": "",
+    "id_document": "DNI",
+    "id_number": "235868",
+    "entity": "PARTICULAR",
+    "reason": "REUNI\u00c3\u201cN DE TRABAJO",
+    "host_name": "REGENTE OCMIN, EDWIN EDUARDO",
+    "full_name": "SOTO FUENTES, NELSON",
+    "date": "2014-07-08",
+    "time_end": "16:32",
+    "institution": "minem",
+    "location": ""
+}
+```
+
