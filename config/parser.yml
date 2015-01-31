@@ -1,10 +1,7 @@
 input_dir: "html_tc"
 
 start_detectors:
-  - "N. Vis."
-  - "N�"
-  - "Numero"
-  - "N. Visitas"
+  - "N"
 
 end_detectors:
   - ""

@@ -37,12 +37,13 @@ File.open("#{ OUTPUT_DIR }/#{ OUTPUT_FILENAME }.json", "w") do |output_file|
 
       table.css("tr").each do |tr|
         columns = tr.css("td").map { |td| td.text.to_s.force_encoding("ISO-8859-1").encode("UTF-8") }
+        first   = columns.first
 
-        if !started && (START_DETECTORS.empty? || START_DETECTORS.include?(columns.first))
+        if !started && (START_DETECTORS.empty? || START_DETECTORS.any? { |d| first.start_with?(d) })
           headers = columns.dup
           started = true
         elsif started
-          break if END_DETECTORS.include?(columns.first)
+          break if END_DETECTORS.include?(first)
 
           content << FIELD_MAPPINGS.dup.reduce({ "date" => date }) do |h, (field, data)|
             field_headers = data.fetch(HEADERS_KEY, []).map(&:strip)
