@@ -7,10 +7,13 @@ start_detectors:
   - "Â"
   - "FECHA"
   - "ORDEN"
+  - "DNI"
+  - "<p"
 
 end_detectors:
   - ""
   - "&nbsp;"
+  - "Â"
 
 field_mappings:
   time_start:
