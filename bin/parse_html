@@ -18,14 +18,17 @@ START_DETECTORS = PARSER_CONFIG.fetch "start_detectors", []
 END_DETECTORS   = PARSER_CONFIG.fetch "end_detectors",   []
 FIELD_MAPPINGS  = PARSER_CONFIG.fetch "field_mappings",  []
 
+INPUT_PATHS     = Dir["#{ INPUT_DIR }/*#{ INPUT_EXTENSION }"]
+
 FileUtils.mkdir_p(OUTPUT_DIR)
 
-File.open("#{ OUTPUT_DIR }/#{ OUTPUT_FILENAME }.json", "w") do |output_file|
-  content = []
+total_files = INPUT_PATHS.length
+content     = []
 
-  Dir["#{ INPUT_DIR }/*#{ INPUT_EXTENSION }"].each do |path|
-    date = path.match(/\d{4}-\d{2}-\d{2}/)[0]
-    puts "Processing #{ date }"
+File.open("#{ OUTPUT_DIR }/#{ OUTPUT_FILENAME }.json", "w") do |output_file|
+  INPUT_PATHS.each_with_index do |path, i|
+    date = path.match(/\d{4}-\d{2}-\d{2}/)[0] # get date from filename
+    print "\r#{ (i + 1).to_s.rjust(total_files.to_s.length) }/#{ total_files } - Processing #{ date } "
 
     File.open(path, "r") do |input_file|
       table   = Nokogiri::HTML(input_file.read).css("table")
@@ -55,4 +58,5 @@ File.open("#{ OUTPUT_DIR }/#{ OUTPUT_FILENAME }.json", "w") do |output_file|
   end
 
   output_file << content.join("\n")
+  puts "#{ total_files }/#{ total_files } - Done."
 end
