@@ -27,6 +27,7 @@ FileUtils.mkdir_p(OUTPUT_DIR)
 
 total_files = INPUT_PATHS.length
 content     = []
+skipped     = []
 
 Zlib::GzipWriter.open("#{ OUTPUT_DIR }/#{ OUTPUT_FILENAME }.jsonl.gz") do |output_file|
   INPUT_PATHS.each_with_index do |path, i|
@@ -59,8 +60,11 @@ Zlib::GzipWriter.open("#{ OUTPUT_DIR }/#{ OUTPUT_FILENAME }.jsonl.gz") do |outpu
           output_file << JSON_SEPARATOR
         end
       end
+
+      skipped << path if headers.empty?
     end
   end
 end
 
 puts "\r#{ total_files }/#{ total_files } - Processing done.".ljust(LINE_SIZE)
+puts "No headers found in #{ skipped.length } files:\n#{ skipped.join("\n") }"
