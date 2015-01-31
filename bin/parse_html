@@ -6,16 +6,17 @@ require "fileutils"
 require "yaml"
 require "json"
 
-PARSER_CONFIG   = YAML.load_file("config/parser.yml")
-INPUT_DIR       = PARSER_CONFIG.fetch("input_dir", "input")
-OUTPUT_DIR      = PARSER_CONFIG.fetch("output_dir", "output")
-INPUT_EXTENSION = PARSER_CONFIG.fetch("input_extension", ".html")
-START_DETECTORS = PARSER_CONFIG.fetch("start_detectors", [])
-END_DETECTORS   = PARSER_CONFIG.fetch("end_detectors", [])
-FIELD_MAPPINGS  = PARSER_CONFIG.fetch("field_mappings", [])
 HEADERS_KEY     = "headers"
 DEFAULT_KEY     = "default"
 OUTPUT_FILENAME = "parsed_html"
+PARSER_CONFIG   = YAML.load_file("config/parser.yml")
+
+INPUT_DIR       = PARSER_CONFIG.fetch "input_dir",       "input"
+OUTPUT_DIR      = PARSER_CONFIG.fetch "output_dir",      "output"
+INPUT_EXTENSION = PARSER_CONFIG.fetch "input_extension", ".html"
+START_DETECTORS = PARSER_CONFIG.fetch "start_detectors", []
+END_DETECTORS   = PARSER_CONFIG.fetch "end_detectors",   []
+FIELD_MAPPINGS  = PARSER_CONFIG.fetch "field_mappings",  []
 
 FileUtils.mkdir_p(OUTPUT_DIR)
 
