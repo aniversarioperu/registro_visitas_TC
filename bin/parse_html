@@ -17,6 +17,7 @@ PARSER_CONFIG   = YAML.load_file("config/parser.yml")
 INPUT_DIR       = PARSER_CONFIG.fetch "input_dir",       "input"
 OUTPUT_DIR      = PARSER_CONFIG.fetch "output_dir",      "output"
 INPUT_EXTENSION = PARSER_CONFIG.fetch "input_extension", ".html"
+MAX_OFFSET      = PARSER_CONFIG.fetch "max_offset",      5
 START_DETECTORS = PARSER_CONFIG.fetch "start_detectors", []
 END_DETECTORS   = PARSER_CONFIG.fetch "end_detectors",   []
 FIELD_MAPPINGS  = PARSER_CONFIG.fetch "field_mappings",  []
@@ -39,9 +40,15 @@ Zlib::GzipWriter.open("#{ OUTPUT_DIR }/#{ OUTPUT_FILENAME }.jsonl.gz") do |outpu
       started = false
       headers = []
 
+      offset = 0.upto(MAX_OFFSET).find do |o|
+        table.css("tr td:nth-child(#{ o + 1 })").map do |t|
+          t.text.force_encoding("ISO-8859-1").encode("UTF-8").strip
+        end.reject(&:empty?).any?
+      end.to_i
+
       table.css("tr").each do |tr|
         columns = tr.css("td").map { |td| td.text.force_encoding("ISO-8859-1").encode("UTF-8") }
-        first   = columns.first
+        first   = columns[offset] || columns.first
 
         if !started && (START_DETECTORS.empty? || START_DETECTORS.any? { |d| first.start_with?(d) })
           headers = columns.dup
