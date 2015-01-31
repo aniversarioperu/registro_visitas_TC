@@ -9,6 +9,7 @@ require "json"
 HEADERS_KEY     = "headers"
 DEFAULT_KEY     = "default"
 OUTPUT_FILENAME = "parsed_html"
+JSON_SEPARATOR  = "\n"
 PARSER_CONFIG   = YAML.load_file("config/parser.yml")
 
 INPUT_DIR       = PARSER_CONFIG.fetch "input_dir",       "input"
@@ -36,7 +37,7 @@ File.open("#{ OUTPUT_DIR }/#{ OUTPUT_FILENAME }.json", "w") do |output_file|
       headers = []
 
       table.css("tr").each do |tr|
-        columns = tr.css("td").map { |td| td.text.to_s.force_encoding("ISO-8859-1").encode("UTF-8") }
+        columns = tr.css("td").map { |td| td.text.force_encoding("ISO-8859-1").encode("UTF-8") }
         first   = columns.first
 
         if !started && (START_DETECTORS.empty? || START_DETECTORS.any? { |d| first.start_with?(d) })
@@ -45,7 +46,7 @@ File.open("#{ OUTPUT_DIR }/#{ OUTPUT_FILENAME }.json", "w") do |output_file|
         elsif started
           break if END_DETECTORS.include?(first)
 
-          content << FIELD_MAPPINGS.dup.reduce({ "date" => date }) do |h, (field, data)|
+          output_file << FIELD_MAPPINGS.dup.reduce({ "date" => date }) do |h, (field, data)|
             field_headers = data.fetch(HEADERS_KEY, []).map(&:strip)
             field_index   = headers.index { |header| field_headers.include?(header.strip) }
             field_content = columns[field_index] if field_index
@@ -53,11 +54,11 @@ File.open("#{ OUTPUT_DIR }/#{ OUTPUT_FILENAME }.json", "w") do |output_file|
             h[field] = field_content || data[DEFAULT_KEY]
             h
           end.to_json
+          output_file << JSON_SEPARATOR
         end
       end
     end
   end
 
-  output_file << content.join("\n")
-  puts "#{ total_files }/#{ total_files } - Done."
+  print "\r#{ total_files }/#{ total_files } - Done.                                 "
 end
