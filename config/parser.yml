@@ -8,6 +8,7 @@ start_detectors:
 
 end_detectors:
   - ""
+  - "&nbsp;"
 
 field_mappings:
   time_start:
