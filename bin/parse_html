@@ -15,14 +15,16 @@ END_DETECTORS   = PARSER_CONFIG.fetch("end_detectors", [])
 FIELD_MAPPINGS  = PARSER_CONFIG.fetch("field_mappings", [])
 HEADERS_KEY     = "headers"
 DEFAULT_KEY     = "default"
+OUTPUT_FILENAME = "parsed_html"
 
 FileUtils.mkdir_p(OUTPUT_DIR)
 
-Dir["#{ INPUT_DIR }/*#{ INPUT_EXTENSION }"].each do |path|
-  date = path.match(/\d{4}-\d{2}-\d{2}/)[0]
+File.open("#{ OUTPUT_DIR }/#{ OUTPUT_FILENAME }.json", "w") do |output_file|
+  content = []
 
-  File.open("#{ OUTPUT_DIR }/#{ date }.json", "w") do |output_file|
-    content = []
+  Dir["#{ INPUT_DIR }/*#{ INPUT_EXTENSION }"].each do |path|
+    date = path.match(/\d{4}-\d{2}-\d{2}/)[0]
+    puts "Processing #{ date }"
 
     File.open(path, "r") do |input_file|
       table   = Nokogiri::HTML(input_file.read).css("table")
@@ -31,13 +33,12 @@ Dir["#{ INPUT_DIR }/*#{ INPUT_EXTENSION }"].each do |path|
 
       table.css("tr").each do |tr|
         columns = tr.css("td").map(&:text)
-        first   = columns.first
 
-        if !started && (START_DETECTORS.empty? || START_DETECTORS.include?(first))
+        if !started && (START_DETECTORS.empty? || START_DETECTORS.include?(columns.first))
           headers = columns.dup
           started = true
         elsif started
-          break if END_DETECTORS.include?(first)
+          break if END_DETECTORS.include?(columns.first)
 
           content << FIELD_MAPPINGS.dup.reduce({ "date" => date }) do |h, (field, data)|
             field_headers = data.fetch(HEADERS_KEY, []).map(&:strip)
@@ -46,11 +47,11 @@ Dir["#{ INPUT_DIR }/*#{ INPUT_EXTENSION }"].each do |path|
 
             h[field] = field_content || data[DEFAULT_KEY]
             h
-          end
+          end.to_json
         end
       end
     end
-
-    output_file << content.to_json
   end
+
+  output_file << content.join("\n")
 end
