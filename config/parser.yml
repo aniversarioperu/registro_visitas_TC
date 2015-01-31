@@ -2,6 +2,11 @@ input_dir: "html_tc"
 
 start_detectors:
   - "N"
+  - "VISITANTE"
+  - "&nbsp;"
+  - "Â"
+  - "FECHA"
+  - "ORDEN"
 
 end_detectors:
   - ""
