@@ -11,6 +11,7 @@ HEADERS_KEY     = "headers"
 DEFAULT_KEY     = "default"
 OUTPUT_FILENAME = "parsed_html"
 JSON_SEPARATOR  = "\n"
+LINE_SIZE       = 80
 PARSER_CONFIG   = YAML.load_file("config/parser.yml")
 
 INPUT_DIR       = PARSER_CONFIG.fetch "input_dir",       "input"
@@ -30,7 +31,7 @@ content     = []
 Zlib::GzipWriter.open("#{ OUTPUT_DIR }/#{ OUTPUT_FILENAME }.jsonl.gz") do |output_file|
   INPUT_PATHS.each_with_index do |path, i|
     date = path.match(/\d{4}-\d{2}-\d{2}/)[0] # get date from filename
-    print "\r#{ (i + 1).to_s.rjust(total_files.to_s.length) }/#{ total_files } - Processing #{ date } "
+    print "\r#{ (i + 1).to_s.rjust(total_files.to_s.length) }/#{ total_files } - Processing #{ date } ".ljust(LINE_SIZE)
 
     File.open(path, "r") do |input_file|
       table   = Nokogiri::HTML(input_file.read).css("table")
@@ -62,4 +63,4 @@ Zlib::GzipWriter.open("#{ OUTPUT_DIR }/#{ OUTPUT_FILENAME }.jsonl.gz") do |outpu
   end
 end
 
-print "\r#{ total_files }/#{ total_files } - Done.                                 "
+puts "\r#{ total_files }/#{ total_files } - Processing done.".ljust(LINE_SIZE)
