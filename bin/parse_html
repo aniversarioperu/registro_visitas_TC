@@ -74,4 +74,4 @@ Zlib::GzipWriter.open("#{ OUTPUT_DIR }/#{ OUTPUT_FILENAME }.jsonl.gz") do |outpu
 end
 
 puts "\r#{ total_files }/#{ total_files } - Processing done.".ljust(LINE_SIZE)
-puts "No headers found in #{ skipped.length } files:\n#{ skipped.join("\n") }"
+puts "No headers found in #{ skipped.length } files:\n#{ skipped.join("\n") }" unless skipped.empty?
