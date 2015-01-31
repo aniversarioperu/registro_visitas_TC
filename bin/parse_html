@@ -36,7 +36,7 @@ File.open("#{ OUTPUT_DIR }/#{ OUTPUT_FILENAME }.json", "w") do |output_file|
       headers = []
 
       table.css("tr").each do |tr|
-        columns = tr.css("td").map(&:text)
+        columns = tr.css("td").map { |td| td.text.to_s.force_encoding("ISO-8859-1").encode("UTF-8") }
 
         if !started && (START_DETECTORS.empty? || START_DETECTORS.include?(columns.first))
           headers = columns.dup
@@ -47,7 +47,7 @@ File.open("#{ OUTPUT_DIR }/#{ OUTPUT_FILENAME }.json", "w") do |output_file|
           content << FIELD_MAPPINGS.dup.reduce({ "date" => date }) do |h, (field, data)|
             field_headers = data.fetch(HEADERS_KEY, []).map(&:strip)
             field_index   = headers.index { |header| field_headers.include?(header.strip) }
-            field_content = columns[field_index].to_s.force_encoding("ISO-8859-1").encode("UTF-8") if field_index
+            field_content = columns[field_index] if field_index
 
             h[field] = field_content || data[DEFAULT_KEY]
             h
