@@ -5,6 +5,7 @@ require "nokogiri"
 require "fileutils"
 require "yaml"
 require "json"
+require "zlib"
 
 HEADERS_KEY     = "headers"
 DEFAULT_KEY     = "default"
@@ -26,7 +27,7 @@ FileUtils.mkdir_p(OUTPUT_DIR)
 total_files = INPUT_PATHS.length
 content     = []
 
-File.open("#{ OUTPUT_DIR }/#{ OUTPUT_FILENAME }.json", "w") do |output_file|
+Zlib::GzipWriter.open("#{ OUTPUT_DIR }/#{ OUTPUT_FILENAME }.jsonl.gz") do |output_file|
   INPUT_PATHS.each_with_index do |path, i|
     date = path.match(/\d{4}-\d{2}-\d{2}/)[0] # get date from filename
     print "\r#{ (i + 1).to_s.rjust(total_files.to_s.length) }/#{ total_files } - Processing #{ date } "
@@ -59,6 +60,6 @@ File.open("#{ OUTPUT_DIR }/#{ OUTPUT_FILENAME }.json", "w") do |output_file|
       end
     end
   end
-
-  print "\r#{ total_files }/#{ total_files } - Done.                                 "
 end
+
+print "\r#{ total_files }/#{ total_files } - Done.                                 "
