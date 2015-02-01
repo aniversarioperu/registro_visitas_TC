@@ -1,0 +1,87 @@
+input_dir: "html_tc"
+
+start_detectors:
+  - "N"
+  - "VISITANTE"
+  - "&nbsp;"
+  - "Â"
+  - "FECHA"
+  - "ORDEN"
+  - "DNI"
+  - "<p"
+
+end_detectors:
+  - ""
+  - "&nbsp;"
+  - "Â"
+
+field_mappings:
+  time_start:
+    default: "00:00"
+    headers:
+      - "H. Ing."
+      - "H_Ingreso"
+      - "Ingreso"
+      - "HORA ING."
+
+  office:
+    default: "Tribunal Constitucional"
+
+  title:
+    default: ""
+    headers:
+      - "Observaciones"
+
+  meeting_place:
+    default: ""
+
+  id_document:
+    default: ""
+    headers:
+      - "T. Doc."
+      - "T_Doc"
+
+  id_number:
+    default: ""
+    headers:
+      - "N. Doc."
+      - "N_Doc"
+      - "DOCUMENTO"
+
+  entity:
+    default: ""
+    headers:
+      - "ENTIDAD"
+
+  reason:
+    default: ""
+    headers:
+      - "Raz�n Visita"
+      - "MOTIVO"
+
+  host_name:
+    default: ""
+    headers:
+      - "Persona Visitada"
+      - "VISITADO"
+
+  full_name:
+    default: ""
+    headers:
+      - "Visitante"
+      - "VISITANTE"
+
+  time_end:
+    default: "00:00"
+    headers:
+      - "H.Sal."
+      - "H_Salida"
+      - "HORA SAL."
+
+  institution:
+    default: ""
+
+  location:
+    default: ""
+    headers:
+      - "LUGAR"

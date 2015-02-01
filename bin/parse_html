@@ -1,0 +1,77 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+
+require "nokogiri"
+require "fileutils"
+require "yaml"
+require "json"
+require "zlib"
+
+HEADERS_KEY     = "headers"
+DEFAULT_KEY     = "default"
+OUTPUT_FILENAME = "parsed_html"
+JSON_SEPARATOR  = "\n"
+LINE_SIZE       = 80
+PARSER_CONFIG   = YAML.load_file("config/parser.yml")
+
+INPUT_DIR       = PARSER_CONFIG.fetch "input_dir",       "input"
+OUTPUT_DIR      = PARSER_CONFIG.fetch "output_dir",      "output"
+INPUT_EXTENSION = PARSER_CONFIG.fetch "input_extension", ".html"
+MAX_OFFSET      = PARSER_CONFIG.fetch "max_offset",      5
+START_DETECTORS = PARSER_CONFIG.fetch "start_detectors", []
+END_DETECTORS   = PARSER_CONFIG.fetch "end_detectors",   []
+FIELD_MAPPINGS  = PARSER_CONFIG.fetch "field_mappings",  []
+
+INPUT_PATHS     = Dir["#{ INPUT_DIR }/*#{ INPUT_EXTENSION }"]
+
+FileUtils.mkdir_p(OUTPUT_DIR)
+
+total_files = INPUT_PATHS.length
+content     = []
+skipped     = []
+
+Zlib::GzipWriter.open("#{ OUTPUT_DIR }/#{ OUTPUT_FILENAME }.jsonl.gz") do |output_file|
+  INPUT_PATHS.each_with_index do |path, i|
+    date = path.match(/\d{4}-\d{2}-\d{2}/)[0] # get date from filename
+    print "\r#{ (i + 1).to_s.rjust(total_files.to_s.length) }/#{ total_files } - Processing #{ date } ".ljust(LINE_SIZE)
+
+    File.open(path, "r") do |input_file|
+      table   = Nokogiri::HTML(input_file.read).css("table")
+      started = false
+      headers = []
+
+      offset = 0.upto(MAX_OFFSET).find do |o|
+        table.css("tr td:nth-child(#{ o + 1 })").map do |t|
+          t.text.force_encoding("ISO-8859-1").encode("UTF-8").strip
+        end.reject(&:empty?).any?
+      end.to_i
+
+      table.css("tr").each do |tr|
+        columns = tr.css("td").map { |td| td.text.force_encoding("ISO-8859-1").encode("UTF-8") }
+        first   = columns[offset] || columns.first
+
+        if !started && (START_DETECTORS.empty? || START_DETECTORS.any? { |d| first.start_with?(d) })
+          headers = columns.dup
+          started = true
+        elsif started
+          break if END_DETECTORS.include?(first)
+
+          output_file << FIELD_MAPPINGS.dup.reduce({ "date" => date }) do |h, (field, data)|
+            field_headers = data.fetch(HEADERS_KEY, []).map(&:strip)
+            field_index   = headers.index { |header| field_headers.include?(header.strip) }
+            field_content = columns[field_index] if field_index
+
+            h[field] = field_content || data[DEFAULT_KEY]
+            h
+          end.to_json
+          output_file << JSON_SEPARATOR
+        end
+      end
+
+      skipped << path if headers.empty?
+    end
+  end
+end
+
+puts "\r#{ total_files }/#{ total_files } - Processing done.".ljust(LINE_SIZE)
+puts "No headers found in #{ skipped.length } files:\n#{ skipped.join("\n") }" unless skipped.empty?
