@@ -23,20 +23,17 @@ La idea es que se generen un archivo JSON con estos mismos campos:
 
 ```javascript
 {
-    "time_start": "12:51",
-    "office": "DGAAE - DESPACHO",
-    "title": "Especialista I",
-    "meeting_place": "",
-    "id_document": "DNI",
-    "id_number": "235868",
-    "entity": "PARTICULAR",
-    "reason": "REUNI\u00c3\u201cN DE TRABAJO",
-    "host_name": "REGENTE OCMIN, EDWIN EDUARDO",
-    "full_name": "SOTO FUENTES, NELSON",
-    "date": "2014-07-08",
-    "time_end": "16:32",
-    "institution": "minem",
-    "location": ""
+  "date" : "2005-07-15",
+  "time_end" : "17:13",
+  "time_start" : "16:17",
+  "full_name" : "Carlos  Rocha",
+  "id_document" : "DNI",
+  "id_number" : "07556056",
+  "host_name" : "Silsa",
+  "reason" : "",
+  "entity" : "",
+  "location" : "",
+  "institution" : "Tribunal Constitucional"
 }
 ```
 
