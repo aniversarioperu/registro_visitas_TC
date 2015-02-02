@@ -6,6 +6,10 @@ require "fileutils"
 require "yaml"
 require "json"
 require "zlib"
+require "date"
+
+DATE_START = DateTime.parse("2005-07-16", "%Y-%m-%d")
+DATE_STOP = DateTime.parse("2005-08-01", "%Y-%m-%d")
 
 HEADERS_KEY     = "headers"
 DEFAULT_KEY     = "default"
@@ -33,42 +37,48 @@ skipped     = []
 Zlib::GzipWriter.open("#{ OUTPUT_DIR }/#{ OUTPUT_FILENAME }.jsonl.gz") do |output_file|
   INPUT_PATHS.each_with_index do |path, i|
     date = path.match(/\d{4}-\d{2}-\d{2}/)[0] # get date from filename
+    date_obj = DateTime.parse(date, "%Y-%m-%d")
+
     print "\r#{ (i + 1).to_s.rjust(total_files.to_s.length) }/#{ total_files } - Processing #{ date } ".ljust(LINE_SIZE)
 
     File.open(path, "r") do |input_file|
-      table   = Nokogiri::HTML(input_file.read).css("table")
-      started = false
-      headers = []
+      puts date_obj.to_date
+      if date_obj.to_date >= DATE_START.to_date && date_obj.to_date < DATE_STOP.to_date
+        table   = Nokogiri::HTML(input_file.read).css("table")
+        started = false
+        headers = []
 
-      offset = 0.upto(MAX_OFFSET).find do |o|
-        table.css("tr td:nth-child(#{ o + 1 })").map do |t|
-          t.text.force_encoding("ISO-8859-1").encode("UTF-8").strip
-        end.reject(&:empty?).any?
-      end.to_i
+        offset = 0.upto(MAX_OFFSET).find do |o|
+          table.css("tr td:nth-child(#{ o + 1 })").map do |t|
+            t.text.force_encoding("ISO-8859-1").encode("UTF-8").strip
+          end.reject(&:empty?).any?
+        end.to_i
 
-      table.css("tr").each do |tr|
-        columns = tr.css("td").map { |td| td.text.force_encoding("ISO-8859-1").encode("UTF-8") }
-        first   = columns[offset] || columns.first
-
-        if !started && (START_DETECTORS.empty? || START_DETECTORS.any? { |d| first.start_with?(d) })
-          headers = columns.dup
-          started = true
-        elsif started
-          break if END_DETECTORS.include?(first)
-
-          output_file << FIELD_MAPPINGS.dup.reduce({ "date" => date }) do |h, (field, data)|
-            field_headers = data.fetch(HEADERS_KEY, []).map(&:strip)
-            field_index   = headers.index { |header| field_headers.include?(header.strip) }
-            field_content = columns[field_index] if field_index
-
-            h[field] = field_content || data[DEFAULT_KEY]
-            h
-          end.to_json
-          output_file << JSON_SEPARATOR
+        table.css("tr").each do |tr|
+          columns = tr.css("td").map { |td| td.text.force_encoding("ISO-8859-1").encode("UTF-8") }
+          first   = columns[offset] || columns.first
+  
+          if !started && (START_DETECTORS.empty? || START_DETECTORS.any? { |d| first.start_with?(d) })
+            headers = columns.dup
+            started = true
+          elsif started
+            break if END_DETECTORS.include?(first)
+  
+            output_file << FIELD_MAPPINGS.dup.reduce({ "date" => date }) do |h, (field, data)|
+              field_headers = data.fetch(HEADERS_KEY, []).map(&:strip)
+              field_index   = headers.index { |header| field_headers.include?(header.strip) }
+              field_content = columns[field_index] if field_index
+  
+              h[field] = field_content || data[DEFAULT_KEY]
+              h
+            end.to_json
+            output_file << JSON_SEPARATOR
+          end
         end
+
+        skipped << path if headers.empty?
       end
 
-      skipped << path if headers.empty?
     end
   end
 end

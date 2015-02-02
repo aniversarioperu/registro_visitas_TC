@@ -20,11 +20,12 @@ field_mappings:
     default: "00:00"
     headers:
       - "H. Ing."
+      - "H. Ingreso"
       - "H_Ingreso"
       - "Ingreso"
       - "HORA ING."
 
-  office:
+  institution:
     default: "Tribunal Constitucional"
 
   title:
@@ -57,6 +58,7 @@ field_mappings:
     default: ""
     headers:
       - "Raz�n Visita"
+      - "Razón Visita"
       - "MOTIVO"
 
   host_name:
@@ -77,9 +79,6 @@ field_mappings:
       - "H.Sal."
       - "H_Salida"
       - "HORA SAL."
-
-  institution:
-    default: ""
 
   location:
     default: ""
