@@ -8,8 +8,8 @@ require "json"
 require "zlib"
 require "date"
 
-DATE_START = DateTime.parse("2005-07-16", "%Y-%m-%d")
-DATE_STOP = DateTime.parse("2005-08-01", "%Y-%m-%d")
+DATE_START = DateTime.parse("2006-01-01", "%Y-%m-%d")
+DATE_STOP = DateTime.parse("2007-01-01", "%Y-%m-%d")
 
 HEADERS_KEY     = "headers"
 DEFAULT_KEY     = "default"
