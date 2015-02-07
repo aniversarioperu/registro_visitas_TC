@@ -82,6 +82,8 @@ field_mappings:
       - "H.Sal."
       - "H_Salida"
       - "HORA SAL."
+      - "Salida"
+      - "SALIDA"
 
   location:
     default: ""
